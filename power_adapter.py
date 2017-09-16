@@ -23,7 +23,7 @@ creds_file = '/tmp/creds.txt'
 
 creds = None
 try:
-    infile = open(creds_file, 'rb')
+    infile = open(creds_file, 'r')
     creds = pickle.load(infile)
     print("Credentials loaded from cache")
     infile.close()
@@ -40,4 +40,5 @@ finally:
     output = open(creds_file, 'wb')
     pickle.dump(sp.authenticated, output)
     output.close()
+    print("Saved Credentials to cache")
 
