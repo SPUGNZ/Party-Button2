@@ -3,6 +3,7 @@ import time
 import math
 from machine import PWM
 from machine import Pin
+from qhue import Bridge
 
 # Set up WiFi
 def do_connect():
@@ -32,7 +33,39 @@ def pulse(l, t):
         l.duty(int(math.sin(i/10*math.pi)*500+500))
         time.sleep_ms(t)
 
+
+def party_slut():
+    try:
+        for i in range(0,2):
+            for color in colorlist:
+                bridge.lights[8].state(on=True, bri=255, sat=255, hue=color, transitiontime=0)
+                time.sleep(0.188)
+        bridge.lights[8].state(**before)
+    except:
+        bridge.lights[8].state(**before)
+
 do_connect()
+
+# Setup hue stuff
+BRIDGE_IP = '192.168.99.160'
+USER = '2UqWouPgji3QY-PcoqakTsIRx0MQdY7LVEL3tptj'
+
+bridge = Bridge(BRIDGE_IP, USER)
+
+# Colors
+ORANGE = 6000
+YELLOW = 14500
+GREEN = 26000
+BLUE = 46920
+PURPLE = 49000
+PINK = 56100
+RED = 65280
+
+colorlist = [YELLOW, BLUE, RED, GREEN, PINK, ORANGE, PURPLE]
+
+before = bridge.lights[8]()['state']
+del before['colormode']
+del before['reachable']
 
 # Setup pins
 # D1 is the button switch
@@ -52,8 +85,7 @@ while True:
         time.sleep_ms(5)
     elif button_pressed:
         led.duty(1023)
-        print('Button pressed!')
-        time.sleep_ms(2000)
+        party_slut()
         button_pressed = False
     else:
         pulse(led, 25)
