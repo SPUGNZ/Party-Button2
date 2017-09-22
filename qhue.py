@@ -6,8 +6,6 @@ import json
 import ure
 import sys
 
-__all__ = ('Bridge', 'QhueException', 'create_new_username')
-
 # default timeout in seconds
 _DEFAULT_TIMEOUT = 5
 
@@ -19,9 +17,9 @@ class Resource(object):
         self.address = url[url.find('/api'):]
         # Also find the bit after the username, if there is one
         self.short_address = None
-        post_username_match = ure.search(r'/api/[^/]*(.*)', url)
-        if post_username_match is not None:
-            self.short_address = post_username_match.group(1)
+        #post_username_match = ure.search(r'/api/[^/]*(.*)', url)
+        #if post_username_match is not None:
+        #    self.short_address = post_username_match.group(1)
         self.timeout = timeout
 
     def __call__(self, *args, **kwargs):
@@ -53,35 +51,8 @@ class Resource(object):
     __getitem__ = __getattr__
 
 
-def _api_url(ip, username=None):
-    if username is None:
-        return "http://{}/api".format(ip)
-    else:
-        return "http://{}/api/{}".format(ip, username)
-
-
-def create_new_username(ip, devicetype, timeout=_DEFAULT_TIMEOUT):
-    """Interactive helper function to generate a new anonymous username.
-
-    Args:
-        ip: ip address of the bridge
-        devicetype (optional): devicetype to register with the bridge. If
-            unprovided, generates a device type based on the local hostname.
-        timeout (optional, default=5): request timeout in seconds
-    Raises:
-        QhueException if something went wrong with username generation (for
-            example, if the bridge button wasn't pressed).
-    """
-    res = Resource(_api_url(ip), timeout)
-    prompt = "Press the Bridge button, then press Return: "
-    # Deal with one of the sillier python3 changes
-    _ = input(prompt)
-
-    # raises QhueException if something went wrong
-    response = res(devicetype=devicetype, http_method="post")
-
-    return response[0]["success"]["username"]
-
+def _api_url(ip, username):
+    return "http://{}/api/{}".format(ip, username)
 
 class Bridge(Resource):
 

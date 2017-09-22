@@ -1,9 +1,13 @@
+from qhue import Bridge
+from pyW215 import SmartPlug, ON, OFF
 import network
 import time
+import os
+import pickle
 import math
+import gc
 from machine import PWM
 from machine import Pin
-from qhue import Bridge
 
 # Set up WiFi
 def do_connect():
@@ -33,7 +37,25 @@ def pulse(l, t):
         l.duty(int(math.sin(i/10*math.pi)*500+500))
         time.sleep_ms(t)
 
+def cycle():
+    # Turn switch on and off
+    try:
+        for i in range(0,3):
+            # Get values if available otherwise return N/A
+            print("State: %s" % sp.state)
+            if sp.state == "ON":
+                sp.state = OFF
+            else:
+                sp.state = ON
+            time.sleep(5)
+    finally:
+        # cache this for later
+        output = open(creds_file, 'wb')
+        pickle.dump(sp.authenticated, output)
+        output.close()
+        print("Saved Credentials to cache")
 
+# Be the life of the party!
 def party_slut():
     try:
         for i in range(0,2):
@@ -67,6 +89,19 @@ before = bridge.lights[8]()['state']
 del before['colormode']
 del before['reachable']
 
+# Setup SmartPower
+creds_file = "/tmp/creds.txt"
+try:
+    infile = open(creds_file, 'r')
+    creds = pickle.load(infile)
+    print("Credentials loaded from cache")
+    infile.close()
+except:
+    print("No cached Credentials")
+    creds = None
+
+sp = SmartPlug('192.168.99.185', '857947', 'admin', True, auth=creds)
+
 # Setup pins
 # D1 is the button switch
 D1 = Pin(5, Pin.IN)
@@ -85,7 +120,8 @@ while True:
         time.sleep_ms(5)
     elif button_pressed:
         led.duty(1023)
-        party_slut()
+        #party_slut()
+        cycle()
         button_pressed = False
     else:
         pulse(led, 25)
